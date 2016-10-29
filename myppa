@@ -1,0 +1,60 @@
+#!/usr/bin/env sh
+# vi:syntax=sh
+
+if which myppa > /dev/null; then
+  myppa "$@"
+  exit $?
+fi
+
+setup_vars() {
+  local script=$(readlink -f "$0")
+  root=$(dirname $script)
+  cache=$root/cache
+}
+
+venv_myppa() {
+  ( sh $cache/venv/bin/activate && myppa "$@" )
+}
+
+setup_vars
+
+if [ -f $cache/venv/bin/myppa ]; then
+  venv_myppa "$@"
+fi
+
+cat <<EOT
+MyPPA command-line tool "myppa" is missing on your system.
+You can install it manually according to the guide at
+
+  https://github.com/ivochkin/myppa-tool
+
+Or, we can download and install everything needed for
+myppa into the "cache" directory.
+
+EOT
+
+read -p "Setup myppa-tool? (no root is required) [y/n]" yesno
+echo $yesno
+if echo $yesno | grep -Eqv '(yes|y|YES|Y|Yes)'; then
+  exit 1
+fi
+
+cd $cache
+wget -c https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tgz
+tar xzf Python-3.5.2.tgz
+cd Python-3.5.2
+./configure --enable-shared --prefix=$cache LDFLAGS="-Wl,--rpath=$cache/lib"
+make -j
+make altinstall
+$cache/bin/pip3.5 install pip setuptools --upgrade
+$cache/bin/pip3.5 install virtualenv
+$cache/bin/virtualenv -p $cache/bin/python3.5 $cache/venv
+( sh $cache/venv/bin/activate && pip install pip --upgrade )
+( sh $cache/venv/bin/activate && pip install myppa )
+
+cat <<EOT
+Installation completed. Will run now the requested command
+  $0 $@
+EOT
+
+venv_myppa "$@"

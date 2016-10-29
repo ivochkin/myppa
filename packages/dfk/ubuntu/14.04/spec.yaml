@@ -1,0 +1,16 @@
+---
+name: dfk
+version: 0.0.2
+source-archive: https://github.com/ivochkin/dfk/archive/v0.0.2.tar.gz
+apt-required-packages:
+  - libcurl4-openssl-dev
+builder: cmake
+cmake-args:
+  CMAKE_BUILD_TYPE: Release
+  BUILD_SHARED_LIBS: ON
+  DFK_MAINTAINER_MODE: ON
+  DFK_BUILD_CPP_BINDINGS: ON
+  DFK_BUILD_SAMPLES: OFF
+  DFK_BUILD_UNIT_TESTS: OFF
+  DFK_BUILD_AUTO_TESTS: OFF
+...
