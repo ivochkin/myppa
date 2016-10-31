@@ -13,13 +13,25 @@ setup_vars() {
 }
 
 venv_myppa() {
-  ( sh $cache/venv/bin/activate && myppa "$@" )
+  ( . $cache/venv/bin/activate && myppa "$@" )
+}
+
+spin() {
+  local spinstr='|/-\'
+  while read -r line
+  do
+    local temp=${spinstr#?}
+    printf "%c\b" "$spinstr"
+    local spinstr=$temp${spinstr%"$temp"}
+    echo $line >> $1
+  done
 }
 
 setup_vars
 
 if [ -f $cache/venv/bin/myppa ]; then
   venv_myppa "$@"
+  exit $?
 fi
 
 cat <<EOT
@@ -33,24 +45,34 @@ myppa into the "cache" directory.
 
 EOT
 
-read -p "Setup myppa-tool? (no root is required) [y/n]" yesno
+read -p "Setup myppa-tool? (no root is required) [y/N]" yesno
 echo $yesno
 if echo $yesno | grep -Eqv '(yes|y|YES|Y|Yes)'; then
   exit 1
 fi
 
 cd $cache
-wget -c https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tgz
-tar xzf Python-3.5.2.tgz
+echo Downloading Python 3.5.2 ...
+wget -c https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tgz > $cache/install.log
+echo -n "Extracting sources ... "
+tar xzvf Python-3.5.2.tgz 2>&1 | spin $cache/install.log
+echo done
+echo -n "Configuring Python 3.5.2 ... "
 cd Python-3.5.2
-./configure --enable-shared --prefix=$cache LDFLAGS="-Wl,--rpath=$cache/lib"
-make -j
-make altinstall
+./configure --enable-shared --prefix=$cache LDFLAGS="-Wl,--rpath=$cache/lib" 2>&1 | spin $cache/install.log
+echo done
+echo -n "Building Python 3.5.2 ... "
+make -j 2>&1 | spin $cache/install.log
+echo done
+echo -n "Installing Python 3.5.2 into '$cache' ... "
+make altinstall 2>&1 | spin $cache/install.log
+echo done
+echo "Setting up virtualenv at $cache/venv ... "
 $cache/bin/pip3.5 install pip setuptools --upgrade
 $cache/bin/pip3.5 install virtualenv
 $cache/bin/virtualenv -p $cache/bin/python3.5 $cache/venv
-( sh $cache/venv/bin/activate && pip install pip --upgrade )
-( sh $cache/venv/bin/activate && pip install myppa )
+( . $cache/venv/bin/activate && pip install pip --upgrade )
+( . $cache/venv/bin/activate && pip install myppa )
 
 cat <<EOT
 Installation completed. Will run now the requested command
