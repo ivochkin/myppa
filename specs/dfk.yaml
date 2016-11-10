@@ -1,0 +1,57 @@
+base: &base
+  name: libdfk
+  git-repository: https://github.com/ivochkin/dfk.git
+  before-configure: bash scripts/bootstrap.sh
+  builder: cmake
+  cmake-args: &cmakeargs
+    CMAKE_BUILD_TYPE: Release
+    BUILD_SHARED_LIBS: ON
+    DFK_MAINTAINER_MODE: ON
+    DFK_MOCKS: OFF
+    DFK_BUILD_CPP_BINDINGS: ON
+    DFK_BUILD_SAMPLES: OFF
+    DFK_BUILD_UNIT_TESTS: OFF
+    DFK_BUILD_AUTO_TESTS: OFF
+  install-paths:
+    - '*.so'
+  maintainer: Stanislav Ivochkin <isn@extrn.org>
+  homepage: https://dfk.extrn.org
+  license: MIT
+  deb-section: libs
+  deb-priority: optional
+
+version-0.0.2: &version002
+  version: 0.0.2
+  git-revision: v0.0.2
+
+version-latest: &versionlatest
+  version: latest
+  version-script: date +"nightly%Y%m%d~git$(git rev-parse --short HEAD)"
+  git-revision: master
+
+dev: &dev
+  name: libdfk-dev
+  cmake-args:
+    <<: *cmakeargs
+    DBUILD_SHARED_LIBS: OFF
+  install-paths:
+    - '*.h'
+    - '*.a'
+
+package-0.0.2:
+  <<: *base
+  <<: *version002
+
+package-0.0.2-dev:
+  <<: *base
+  <<: *version002
+  <<: *dev
+
+package-latest:
+  <<: *base
+  <<: *versionlatest
+
+package-latest-dev:
+  <<: *base
+  <<: *versionlatest
+  <<: *dev
