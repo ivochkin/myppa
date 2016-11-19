@@ -1,7 +1,9 @@
 base: &base
   name: libdfk
   git-repository: https://github.com/ivochkin/dfk.git
-  before-configure: bash scripts/bootstrap.sh
+  build-depends:
+    - libcurl4-openssl-dev
+  before-configure: bash scripts/bootstrap.sh --without-curl
   builder: cmake
   cmake-args: &cmakeargs
     CMAKE_BUILD_TYPE: Release
@@ -19,6 +21,7 @@ base: &base
   license: MIT
   deb-section: libs
   deb-priority: optional
+  version-append-codename: True
 
 version-0.0.2: &version002
   version: 0.0.2
