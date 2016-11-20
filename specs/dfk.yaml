@@ -5,17 +5,17 @@ base: &base
     - libcurl4-openssl-dev
   before-configure: bash scripts/bootstrap.sh --without-curl
   builder: cmake
-  cmake-args: &cmakeargs
+  cmake-args:
     CMAKE_BUILD_TYPE: Release
     BUILD_SHARED_LIBS: ON
     DFK_MAINTAINER_MODE: ON
     DFK_MOCKS: OFF
-    DFK_BUILD_CPP_BINDINGS: ON
+    DFK_BUILD_CPP_BINDINGS: OFF
     DFK_BUILD_SAMPLES: OFF
     DFK_BUILD_UNIT_TESTS: OFF
     DFK_BUILD_AUTO_TESTS: OFF
   install-paths:
-    - '*.so'
+    - 'libdfk\.so[\.0-9]*'
   maintainer: Stanislav Ivochkin <isn@extrn.org>
   homepage: https://dfk.extrn.org
   license: MIT
@@ -23,38 +23,79 @@ base: &base
   deb-priority: optional
   version-append-codename: True
 
-version-0.0.2: &version002
-  version: 0.0.2
-  git-revision: v0.0.2
+dev: &dev
+  name: libdfk-dev
+  +dev:cmake-args:
+    BUILD_SHARED_LIBS: OFF
+  +dev:depends:
+    - libdfk={{version}}
+  install-paths:
+    - '\.h$'
+    - 'libdfk\.a$'
+
+cpp: &cpp
+  name: libdfkcpp
+  +cpp:cmake-args:
+    DFK_BUILD_CPP_BINDINGS: ON
+  install-paths:
+    - 'libdfkcpp\.so[\.0-9]*'
+
+cpp-dev: &cppdev
+  name: libdfkcpp-dev
+  +cpp:cmake-args:
+    DFK_BUILD_CPP_BINDINGS: ON
+  +dev:cmake-args:
+    BUILD_SHARED_LIBS: OFF
+  +cppdev:depends:
+    - libdfk-dev
+    - libdfkcpp={{version}}
+  install-paths:
+    - '\.hpp$'
+    - 'libdfkcpp\.a$'
 
 version-latest: &versionlatest
   version: latest
-  version-script: date +"nightly%Y%m%d~git$(git rev-parse --short HEAD)"
+  version-script: git describe --long --tags HEAD | sed 's/^v//g'
   git-revision: master
-
-dev: &dev
-  name: libdfk-dev
-  cmake-args:
-    <<: *cmakeargs
-    DBUILD_SHARED_LIBS: OFF
-  install-paths:
-    - '*.h'
-    - '*.a'
-
-package-0.0.2:
-  <<: *base
-  <<: *version002
-
-package-0.0.2-dev:
-  <<: *base
-  <<: *version002
-  <<: *dev
 
 package-latest:
   <<: *base
   <<: *versionlatest
 
-package-latest-dev:
+package-dev-latest:
   <<: *base
   <<: *versionlatest
   <<: *dev
+
+package-cpp-latest:
+  <<: *base
+  <<: *versionlatest
+  <<: *cpp
+
+package-cpp-dev-latest:
+  <<: *base
+  <<: *versionlatest
+  <<: *cppdev
+
+version-0.0.2: &version002
+  version: 0.0.2
+  git-revision: v0.0.2
+
+package-0.0.2:
+  <<: *base
+  <<: *version002
+
+package-dev-0.0.2:
+  <<: *base
+  <<: *version002
+  <<: *dev
+
+package-cpp-0.0.2:
+  <<: *base
+  <<: *version002
+  <<: *cpp
+
+package-cpp-dev-0.0.2:
+  <<: *base
+  <<: *version002
+  <<: *cppdev
