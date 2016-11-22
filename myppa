@@ -7,8 +7,9 @@ if which myppa > /dev/null; then
 fi
 
 setup_vars() {
-  local script=$(readlink -f "$0")
-  root=$(dirname $script)
+  pushd $(dirname $0) > /dev/null
+  root=$(pwd -P)
+  popd > /dev/null
   cache=$root/cache
 }
 
