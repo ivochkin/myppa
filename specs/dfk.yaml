@@ -28,7 +28,7 @@ dev: &dev
   +dev:cmake-args:
     BUILD_SHARED_LIBS: OFF
   +dev:depends:
-    - libdfk={{version}}
+    libdfk: $version
   install-paths:
     - '\.h$'
     - 'libdfk\.a$'
@@ -47,8 +47,8 @@ cpp-dev: &cppdev
   +dev:cmake-args:
     BUILD_SHARED_LIBS: OFF
   +cppdev:depends:
-    - libdfk-dev
-    - libdfkcpp={{version}}
+    libdfk-dev:
+    libdfkcpp: $version
   install-paths:
     - '\.hpp$'
     - 'libdfkcpp\.a$'
