@@ -47,33 +47,83 @@ myppa into the "cache" directory.
 EOT
 
 read -p "Setup myppa-tool? (no root is required) [y/N]" yesno
-echo $yesno
-if echo $yesno | grep -Eqv '(yes|y|YES|Y|Yes)'; then
+if printf $yesno | grep -Eqv '(yes|y|YES|Y|Yes)'; then
   exit 1
 fi
 
+
+# Download, compile and install sqlite
+sqlite_version=3150100
 cd $cache
-echo Downloading Python 3.5.2 ...
-wget -c https://www.python.org/ftp/python/3.5.2/Python-3.5.2.tgz > $cache/install.log
-echo -n "Extracting sources ... "
-tar xzvf Python-3.5.2.tgz 2>&1 | spin $cache/install.log
-echo done
-echo -n "Configuring Python 3.5.2 ... "
-cd Python-3.5.2
-./configure --enable-shared --prefix=$cache LDFLAGS="-Wl,--rpath=$cache/lib" 2>&1 | spin $cache/install.log
-echo done
-echo -n "Building Python 3.5.2 ... "
+printf "Downloading SQLite ${sqlite_version} ...\n"
+wget -c https://sqlite.org/2016/sqlite-autoconf-${sqlite_version}.tar.gz > $cache/log
+printf "Extracting sources ... "
+tar xzvf sqlite-autoconf-${sqlite_version}.tar.gz 2>&1 | spin $cache/install.log
+printf "done\n"
+printf "Configuring SQLite ${sqlite_version} ... "
+cd sqlite-autoconf-${sqlite_version}
+./configure --prefix=$cache | spin $cache/install.log
+printf "done\n"
+printf "Building SQLite ${sqlite_version} ... "
+make | spin $cache/install.log
+printf "done\n"
+printf "Installing SQLite ${sqlite_version} into '$cache' ... "
+make install | spin $cache/install.log
+printf "done\n"
+
+# Download, compile and install OpenSSL
+openssl_version=1.0.2j
+cd $cache
+printf "Downloading OpenSSL ${openssl_version} ...\n"
+wget -c https://www.openssl.org/source/openssl-${openssl_version}.tar.gz > $cache/install.log
+printf "Extracting sources ... "
+tar xzvf openssl-${openssl_version}.tar.gz 2>&1 | spin $cache/install.log
+printf "done\n"
+printf "Configuring OpenSSL ${openssl_version} ... "
+cd openssl-${openssl_version}
+if uname -a | grep -qi darwin; then
+  target_platform=darwin64-x86_64-cc
+fi
+if uname -a | grep -qi linux; then
+  target_platform=linux-x86_64
+fi
+./Configure --prefix=$cache $target_platform | spin $cache/install.log
+printf "done\n"
+printf "Building OpenSSL ${openssl_version} ... "
 make -j 2>&1 | spin $cache/install.log
-echo done
-echo -n "Installing Python 3.5.2 into '$cache' ... "
+printf "done\n"
+printf "Installing OpenSSL ${openssl_version} into '$cache' ... "
+make install 2>&1 | spin $cache/install.log
+printf "done\n"
+
+# Download, compile and install Python
+python_version="3.5.2"
+cd $cache
+echo Downloading Python ${python_version} ...
+wget -c https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz > $cache/install.log
+printf "Extracting sources ... "
+tar xzvf Python-${python_version}.tgz 2>&1 | spin $cache/install.log
+printf "done\n"
+printf "Configuring Python ${python_version} ... "
+cd Python-${python_version}
+configure_args="--enable-shared --prefix=$cache PKG_CONFIG_PATH=$cache/lib"
+if uname -a | grep -qi linux ; then
+  configure_args="$configure_args LDFLAGS=\"-Wl,--rpath=$cache/lib\""
+fi
+./configure $configure_args 2>&1 | spin $cache/install.log
+printf "done\n"
+printf "Building Python ${python_version} ... "
+make -j 2>&1 | spin $cache/install.log
+printf "done\n"
+printf "Installing Python ${python_version} into '$cache' ... "
 make altinstall 2>&1 | spin $cache/install.log
-echo done
+printf "done\n"
 echo "Setting up virtualenv at $cache/venv ... "
 $cache/bin/pip3.5 install pip setuptools --upgrade
 $cache/bin/pip3.5 install virtualenv
 $cache/bin/virtualenv -p $cache/bin/python3.5 $cache/venv
 ( . $cache/venv/bin/activate && pip install pip --upgrade )
-( . $cache/venv/bin/activate && pip install myppa )
+( . $cache/venv/bin/activate && pip install --no-cache-dir myppa )
 
 cat <<EOT
 Installation completed. Will run now the requested command
