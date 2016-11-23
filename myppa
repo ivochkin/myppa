@@ -7,9 +7,9 @@ if which myppa > /dev/null; then
 fi
 
 setup_vars() {
-  pushd $(dirname $0) > /dev/null
+  cd $(dirname $0) > /dev/null
   root=$(pwd -P)
-  popd > /dev/null
+  cd - >/dev/null
   cache=$root/cache
 }
 
