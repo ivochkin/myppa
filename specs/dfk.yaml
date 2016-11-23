@@ -22,6 +22,7 @@ base: &base
   deb-section: libs
   deb-priority: optional
   version-append-codename: True
+  git-revision: v$version
 
 dev: &dev
   name: libdfk-dev
@@ -77,25 +78,21 @@ package-cpp-dev-latest:
   <<: *versionlatest
   <<: *cppdev
 
-version-0.0.2: &version002
+base-0.0.2: &base002
+  <<: *base
   version: 0.0.2
-  git-revision: v0.0.2
 
 package-0.0.2:
-  <<: *base
-  <<: *version002
+  <<: *base002
 
 package-dev-0.0.2:
-  <<: *base
-  <<: *version002
+  <<: *base002
   <<: *dev
 
 package-cpp-0.0.2:
-  <<: *base
-  <<: *version002
+  <<: *base002
   <<: *cpp
 
 package-cpp-dev-0.0.2:
-  <<: *base
-  <<: *version002
+  <<: *base002
   <<: *cppdev
