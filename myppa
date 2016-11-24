@@ -65,10 +65,10 @@ cd sqlite-autoconf-${sqlite_version}
 ./configure --prefix=$cache | spin $cache/install.log
 printf "done\n"
 printf "Building SQLite ${sqlite_version} ... "
-make | spin $cache/install.log
+make -j | spin $cache/install.log
 printf "done\n"
 printf "Installing SQLite ${sqlite_version} into '$cache' ... "
-make install | spin $cache/install.log
+make -j install | spin $cache/install.log
 printf "done\n"
 
 # Download, compile and install OpenSSL
@@ -87,13 +87,13 @@ fi
 if uname -a | grep -qi linux; then
   target_platform=linux-x86_64
 fi
-./Configure --prefix=$cache $target_platform | spin $cache/install.log
+./Configure --prefix=$cache $target_platform no-static shared | spin $cache/install.log
 printf "done\n"
 printf "Building OpenSSL ${openssl_version} ... "
 make -j 2>&1 | spin $cache/install.log
 printf "done\n"
 printf "Installing OpenSSL ${openssl_version} into '$cache' ... "
-make install 2>&1 | spin $cache/install.log
+make -j install 2>&1 | spin $cache/install.log
 printf "done\n"
 
 # Download, compile and install Python
@@ -106,9 +106,9 @@ tar xzvf Python-${python_version}.tgz 2>&1 | spin $cache/install.log
 printf "done\n"
 printf "Configuring Python ${python_version} ... "
 cd Python-${python_version}
-configure_args="--enable-shared --prefix=$cache PKG_CONFIG_PATH=$cache/lib"
+configure_args="--enable-shared --prefix=$cache PKG_CONFIG_PATH=$cache/lib/pkgconfig"
 if uname -a | grep -qi linux ; then
-  configure_args="$configure_args LDFLAGS=\"-Wl,--rpath=$cache/lib\""
+  configure_args="$configure_args LDFLAGS=-Wl,--rpath=$cache/lib"
 fi
 ./configure $configure_args 2>&1 | spin $cache/install.log
 printf "done\n"
@@ -116,7 +116,7 @@ printf "Building Python ${python_version} ... "
 make -j 2>&1 | spin $cache/install.log
 printf "done\n"
 printf "Installing Python ${python_version} into '$cache' ... "
-make altinstall 2>&1 | spin $cache/install.log
+make -j altinstall 2>&1 | spin $cache/install.log
 printf "done\n"
 echo "Setting up virtualenv at $cache/venv ... "
 $cache/bin/pip3.5 install pip setuptools --upgrade
