@@ -54,36 +54,27 @@ cpp-dev: &cppdev
     - '\.hpp$'
     - 'libdfkcpp\.a$'
 
-version-latest: &versionlatest
+package-latest: &baselatest
+  <<: *base
   version: latest
   version-script: git describe --long --tags HEAD | sed 's/^v//g'
   git-revision: master
 
-package-latest:
-  <<: *base
-  <<: *versionlatest
-
 package-dev-latest:
-  <<: *base
-  <<: *versionlatest
+  <<: *baselatest
   <<: *dev
 
 package-cpp-latest:
-  <<: *base
-  <<: *versionlatest
+  <<: *baselatest
   <<: *cpp
 
 package-cpp-dev-latest:
-  <<: *base
-  <<: *versionlatest
+  <<: *baselatest
   <<: *cppdev
 
-base-0.0.2: &base002
+package-0.0.2: &base002
   <<: *base
   version: 0.0.2
-
-package-0.0.2:
-  <<: *base002
 
 package-dev-0.0.2:
   <<: *base002
