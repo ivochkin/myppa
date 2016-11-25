@@ -123,6 +123,7 @@ $cache/bin/pip3.5 install pip setuptools --upgrade
 $cache/bin/pip3.5 install virtualenv
 $cache/bin/virtualenv -p $cache/bin/python3.5 $cache/venv
 ( . $cache/venv/bin/activate && pip install pip --upgrade )
+( . $cache/venv/bin/activate && pip install --no-cache-dir vcversioner )
 ( . $cache/venv/bin/activate && pip install --no-cache-dir myppa )
 
 cat <<EOT
