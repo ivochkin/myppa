@@ -68,14 +68,14 @@ printf "Building SQLite ${sqlite_version} ... "
 make -j | spin $cache/install.log
 printf "done\n"
 printf "Installing SQLite ${sqlite_version} into '$cache' ... "
-make -j install | spin $cache/install.log
+make install | spin $cache/install.log
 printf "done\n"
 
 # Download, compile and install OpenSSL
 openssl_version=1.0.2j
 cd $cache
 printf "Downloading OpenSSL ${openssl_version} ...\n"
-wget -c https://www.openssl.org/source/openssl-${openssl_version}.tar.gz > $cache/install.log
+wget -c https://www.openssl.org/source/openssl-${openssl_version}.tar.gz | spin $cache/install.log
 printf "Extracting sources ... "
 tar xzvf openssl-${openssl_version}.tar.gz 2>&1 | spin $cache/install.log
 printf "done\n"
@@ -87,20 +87,20 @@ fi
 if uname -a | grep -qi linux; then
   target_platform=linux-x86_64
 fi
-./Configure --prefix=$cache $target_platform no-static shared | spin $cache/install.log
+./Configure --prefix=$cache $target_platform shared | spin $cache/install.log
 printf "done\n"
 printf "Building OpenSSL ${openssl_version} ... "
 make -j 2>&1 | spin $cache/install.log
 printf "done\n"
 printf "Installing OpenSSL ${openssl_version} into '$cache' ... "
-make -j install 2>&1 | spin $cache/install.log
+make install 2>&1 | spin $cache/install.log
 printf "done\n"
 
 # Download, compile and install Python
 python_version="3.5.2"
 cd $cache
 echo Downloading Python ${python_version} ...
-wget -c https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz > $cache/install.log
+wget -c https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz | spin $cache/install.log
 printf "Extracting sources ... "
 tar xzvf Python-${python_version}.tgz 2>&1 | spin $cache/install.log
 printf "done\n"
@@ -116,7 +116,7 @@ printf "Building Python ${python_version} ... "
 make -j 2>&1 | spin $cache/install.log
 printf "done\n"
 printf "Installing Python ${python_version} into '$cache' ... "
-make -j altinstall 2>&1 | spin $cache/install.log
+make altinstall 2>&1 | spin $cache/install.log
 printf "done\n"
 echo "Setting up virtualenv at $cache/venv ... "
 $cache/bin/pip3.5 install pip setuptools --upgrade
